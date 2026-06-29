@@ -1,0 +1,54 @@
+plugins {
+    id 'java'
+}
+
+group = 'hello'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    //스프링 MVC 추가
+    implementation 'org.springframework:spring-webmvc:6.0.4'
+
+    //내장 톰켓 추가
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.5'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// 일반 Jar 생성
+task buildJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'hello.embed.EmbedTomcatSpringMain' // 실행할 main method
+    }
+    with jar
+}
+// - jar 파일은 jar 파일을 포함할 수 없음 (라이브러리를 지금 jar 파일에 들고 있지 않아서 오류가 남)
+// - 대안: fat jar
+
+// Fat Jar 생성
+// - jar 안에 jar은 포함할 수 없음
+// - 클래스는 포함할 수 있음
+// - 라이브러리에 사용되는 jar을 풀면 class들이 나옴
+// - 이 class를 뽑아서 새로 만드는 jar에 포함 => fat jar
+
+// 단점
+// - 어떤 라이브러리가 포함되었는지 확인하기 어려움
+// - 파일명 중복을 해결할 수 없음
+//      - 클래스나 리소스 명이 같은 경우 하나를 포기해야함
+
+// 스프링 부트가 해결
+task buildFatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'hello.embed.EmbedTomcatSpringMain'
+    }
+    duplicatesStrategy = DuplicatesStrategy.WARN // 파일명 중복 시 경고 발생(덮어버리거나 둘 중 하나를 선택)
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
