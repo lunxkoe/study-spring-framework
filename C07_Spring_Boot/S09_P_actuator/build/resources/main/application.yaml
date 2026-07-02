@@ -7,8 +7,11 @@ management:
     env:
       enabled: true
 
+#  server:
+#    port: 9292
+
   server:
-    port: 9292
+    port: 8080
 
   endpoint:
     shutdown:
@@ -30,3 +33,9 @@ info:
 logging:
   level:
     hello.controller: debug
+
+server:
+  tomcat:
+    mbeanregistry:
+      enabled: true # 많이 사용함
+
